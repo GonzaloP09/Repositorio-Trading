@@ -1,0 +1,518 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0B0E14; --surface:#12161F; --surface2:#191F2C; --border:#242B3A;
+    --text:#E7EAF0; --muted:#7C8598; --gain:#34D399; --loss:#FB6B6B; --accent:#F0A93E;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  #app{background:var(--bg); color:var(--text); font-family:'IBM Plex Sans',sans-serif; padding:28px 24px 48px; min-height:100vh;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .disp{font-family:'Space Grotesk',sans-serif;}
+  .eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 6px;}
+  .hero{display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:20px; border-bottom:1px solid var(--border); padding-bottom:22px; margin-bottom:24px;}
+  .hero-num{font-size:44px; font-weight:600; line-height:1;}
+  .cursor{display:inline-block; width:10px; height:34px; background:var(--accent); margin-left:4px; vertical-align:-6px; animation:blink 1.1s step-start infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .hero-sub{color:var(--muted); font-size:13px; margin-top:8px;}
+  .delta-up{color:var(--gain);} .delta-down{color:var(--loss);}
+  .btn{background:var(--accent); color:#1B1200; border:none; font-weight:600; font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:10px 18px; border-radius:6px; cursor:pointer;}
+  .btn:hover{filter:brightness(1.08);}
+  .btn-ghost{background:transparent; border:1px solid var(--border); color:var(--text);}
+  .btn-ghost:hover{border-color:var(--muted);}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px;}
+  .kpi-label{font-size:12px; color:var(--muted); margin:0 0 8px;}
+  .kpi-val{font-size:22px; font-weight:600;}
+  .kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:28px;}
+  section{margin-bottom:32px;}
+  h2{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; letter-spacing:.02em; margin:0 0 14px; display:flex; align-items:center; gap:10px;}
+  h2::before{content:''; width:3px; height:14px; background:var(--accent); display:inline-block;}
+  table{width:100%; border-collapse:collapse; font-size:13px; color:var(--text); background:transparent;}
+  th{text-align:left; color:var(--muted) !important; background:var(--surface) !important; font-weight:500; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:8px 10px; border-bottom:1px solid var(--border); position:sticky; top:0;}
+  td{padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text) !important; background:transparent !important;}
+  .tbl-wrap{max-height:360px; overflow-y:auto; border:1px solid var(--border); border-radius:10px;}
+  .pos{color:var(--gain) !important;} .neg{color:var(--loss) !important;}
+  .row-del{background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:16px; line-height:1;}
+  .row-del:hover{color:var(--loss);}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end;}
+  label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px;}
+  input{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:9px 10px; border-radius:6px; font-size:14px; font-family:'IBM Plex Mono',monospace;}
+  input:focus{outline:none; border-color:var(--accent);}
+  select{background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:7px 10px; border-radius:6px; font-size:13px; font-family:'IBM Plex Mono',monospace;}
+  select:focus{outline:none; border-color:var(--accent);}
+  .months{display:grid; grid-template-columns:repeat(6,1fr); gap:10px;}
+  .month-cell{background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px;}
+  .month-name{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;}
+  .month-val{font-size:15px; font-weight:600; margin-top:4px;}
+  .veredicto{font-size:14px; font-weight:600; padding:12px 16px; border-radius:8px; margin-bottom:20px;}
+  .ver-ok{background:rgba(52,211,153,.12); color:var(--gain); border:1px solid rgba(52,211,153,.3);}
+  .ver-bad{background:rgba(251,107,107,.12); color:var(--loss); border:1px solid rgba(251,107,107,.3);}
+  .empty{color:var(--muted); font-size:14px; text-align:center; padding:40px 0;}
+  #onboard{max-width:420px; margin:60px auto; text-align:center;}
+  #onboard input{margin-bottom:14px; text-align:center; font-size:20px; padding:14px;}
+</style>
+
+<div id="app">
+  <div id="onboard" style="display:none;">
+    <p class="eyebrow">Balance trading</p>
+    <h2 style="justify-content:center;" class="disp">Arranquemos</h2>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">Ingresá el capital con el que empezás a operar. De ahí en más, cada día cargás tu resultado y el panel se arma solo.</p>
+    <label>Capital inicial ($)</label>
+    <input type="number" id="capitalInicialInput" placeholder="4155">
+    <button class="btn" id="btnOnboard" style="width:100%; margin-bottom:10px;">Guardar y empezar</button>
+    <button class="btn-ghost btn" id="btnImportOnboard" style="width:100%;">Importar historial del Excel</button>
+  </div>
+
+  <div id="main" style="display:none;">
+    <div class="hero">
+      <div style="display:flex; gap:40px; flex-wrap:wrap;">
+        <div>
+          <p class="eyebrow">Saldo sin retiros</p>
+          <div class="hero-num mono" id="capitalActual">$ 0<span class="cursor"></span></div>
+          <div class="hero-sub mono" id="heroDelta">—</div>
+        </div>
+        <div>
+          <p class="eyebrow">Saldo real de la cuenta</p>
+          <div class="hero-num mono" id="saldoReal" style="font-size:32px; color:var(--muted);">$ 0</div>
+          <div class="hero-sub mono" id="heroRetiros">—</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-ghost btn" id="btnImport">Importar historial del Excel</button>
+        <button class="btn-ghost btn" id="btnReset">Reiniciar datos</button>
+      </div>
+    </div>
+
+    <section>
+      <h2>Cargar resultado del día</h2>
+      <div class="card">
+        <div class="form-grid">
+          <div>
+            <label>Fecha</label>
+            <input type="date" id="inFecha">
+          </div>
+          <div>
+            <label>Resultado del día ($)</label>
+            <input type="number" step="any" id="inResultado" placeholder="150">
+          </div>
+          <div>
+            <label>Retiro ese día ($) — opcional</label>
+            <input type="number" step="any" id="inRetiro" placeholder="0">
+          </div>
+          <div>
+            <button class="btn" id="btnAdd">Agregar día</button>
+          </div>
+        </div>
+        <p id="formMsg" style="color:var(--loss); font-size:13px; margin:10px 0 0; display:none;"></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Evolución de la cuenta</h2>
+      <div class="kpi-grid" id="kpiGridCuenta"></div>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+        <h2 style="margin:0;">Performance</h2>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label style="margin:0; font-size:12px; color:var(--muted);">Año</label>
+          <select id="yearSelect" style="width:auto; padding:7px 10px;"></select>
+        </div>
+      </div>
+      <div class="veredicto" id="veredicto"></div>
+      <div class="kpi-grid" id="kpiGridPerformance"></div>
+    </section>
+
+    <section>
+      <h2>Resultado por mes <span id="monthsYearLabel" style="font-size:12px; color:var(--muted); font-weight:400;"></span></h2>
+      <div class="months" id="monthsGrid"></div>
+    </section>
+
+    <section>
+      <h2>Evolución de la cuenta</h2>
+      <div class="card">
+        <div id="evolChart" style="position:relative; min-height:420px;"></div>
+        <div style="display:flex; gap:20px; margin-top:10px; font-size:12px; color:var(--muted);">
+          <span><span style="display:inline-block; width:10px; height:10px; background:var(--accent); border-radius:2px; margin-right:6px;"></span>Saldo (curva de performance)</span>
+          <span><span style="display:inline-block; width:10px; height:10px; background:#5B87B8; border-radius:2px; margin-right:6px;"></span>Saldo real (post-retiros)</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Saldos diarios</h2>
+      <div class="tbl-wrap" id="tblWrap"></div>
+    </section>
+  </div>
+
+  <div id="confirmBanner" style="display:none; position:sticky; bottom:0; background:var(--surface2); border:1px solid var(--accent); border-radius:10px; padding:14px 18px; margin-top:16px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+    <span id="confirmMsg" style="font-size:13px;"></span>
+    <div style="display:flex; gap:10px;">
+      <button class="btn" id="confirmYes">Confirmar</button>
+      <button class="btn-ghost btn" id="confirmNo">Cancelar</button>
+    </div>
+  </div>
+  <div id="toast" style="display:none; position:sticky; bottom:0; background:var(--surface2); border:1px solid var(--gain); color:var(--gain); border-radius:10px; padding:12px 18px; margin-top:16px; font-size:13px;"></div>
+</div>
+
+<script>
+const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+const HISTORICO_CAPITAL_INICIAL = 4155.0;
+const HISTORICO_ENTRIES = [{"id": "imp-1", "fecha": "2025-12-31", "resultado": 100.0, "retiro": 0}, {"id": "imp-2", "fecha": "2026-01-02", "resultado": 639.0, "retiro": 0}, {"id": "imp-3", "fecha": "2026-01-05", "resultado": 63.0, "retiro": 0}, {"id": "imp-4", "fecha": "2026-01-06", "resultado": -38.0, "retiro": 0}, {"id": "imp-5", "fecha": "2026-01-09", "resultado": -101.0, "retiro": 0}, {"id": "imp-6", "fecha": "2026-01-12", "resultado": -366.0, "retiro": 0}, {"id": "imp-7", "fecha": "2026-01-13", "resultado": 220.0, "retiro": 0}, {"id": "imp-8", "fecha": "2026-01-14", "resultado": 380.0, "retiro": 0}, {"id": "imp-9", "fecha": "2026-01-15", "resultado": 78.0, "retiro": 0}, {"id": "imp-10", "fecha": "2026-01-16", "resultado": 150.0, "retiro": 0}, {"id": "imp-11", "fecha": "2026-01-20", "resultado": 364.0, "retiro": 0}, {"id": "imp-12", "fecha": "2026-01-21", "resultado": 623.0, "retiro": 0}, {"id": "imp-13", "fecha": "2026-01-22", "resultado": -52.0, "retiro": 0}, {"id": "imp-14", "fecha": "2026-01-23", "resultado": 185.0, "retiro": 400.0}, {"id": "imp-15", "fecha": "2026-01-26", "resultado": 265.0, "retiro": 0}, {"id": "imp-16", "fecha": "2026-01-28", "resultado": -269.0, "retiro": 0}, {"id": "imp-17", "fecha": "2026-01-28", "resultado": 240.0, "retiro": 0}, {"id": "imp-18", "fecha": "2026-01-30", "resultado": 772.0, "retiro": 0}, {"id": "imp-19", "fecha": "2026-02-04", "resultado": 70.0, "retiro": 1450.0}, {"id": "imp-20", "fecha": "2026-02-05", "resultado": 312.0, "retiro": 0}, {"id": "imp-21", "fecha": "2026-02-06", "resultado": 100.0, "retiro": 0}, {"id": "imp-22", "fecha": "2026-02-11", "resultado": 171.0, "retiro": 0}, {"id": "imp-23", "fecha": "2026-02-13", "resultado": -97.0, "retiro": 0}, {"id": "imp-24", "fecha": "2026-02-18", "resultado": 277.0, "retiro": 0}, {"id": "imp-25", "fecha": "2026-02-19", "resultado": 300.0, "retiro": 0}, {"id": "imp-26", "fecha": "2026-02-20", "resultado": 232.0, "retiro": 850.0}, {"id": "imp-27", "fecha": "2026-02-24", "resultado": -300.0, "retiro": 0}, {"id": "imp-28", "fecha": "2026-02-25", "resultado": -275.0, "retiro": 0}, {"id": "imp-29", "fecha": "2026-02-26", "resultado": 200.0, "retiro": 0}, {"id": "imp-30", "fecha": "2026-02-27", "resultado": 250.0, "retiro": 0}, {"id": "imp-31", "fecha": "2026-03-02", "resultado": -100.0, "retiro": 0}, {"id": "imp-32", "fecha": "2026-03-03", "resultado": 561.0, "retiro": 0}, {"id": "imp-33", "fecha": "2026-03-04", "resultado": -341.0, "retiro": 0}, {"id": "imp-34", "fecha": "2026-03-05", "resultado": 200.0, "retiro": 0}, {"id": "imp-35", "fecha": "2026-03-06", "resultado": 82.0, "retiro": 0}, {"id": "imp-36", "fecha": "2026-03-09", "resultado": -200.0, "retiro": 0}, {"id": "imp-37", "fecha": "2026-03-10", "resultado": -100.0, "retiro": 0}, {"id": "imp-38", "fecha": "2026-03-11", "resultado": 300.0, "retiro": 0}, {"id": "imp-39", "fecha": "2026-03-12", "resultado": 130.0, "retiro": 0}, {"id": "imp-40", "fecha": "2026-03-13", "resultado": -88.0, "retiro": 0}, {"id": "imp-41", "fecha": "2026-03-16", "resultado": 172.0, "retiro": 0}, {"id": "imp-42", "fecha": "2026-03-17", "resultado": 33.0, "retiro": 0}, {"id": "imp-43", "fecha": "2026-03-18", "resultado": -160.0, "retiro": 0}, {"id": "imp-44", "fecha": "2026-03-19", "resultado": 315.0, "retiro": 0}, {"id": "imp-45", "fecha": "2026-03-20", "resultado": -450.0, "retiro": 0}, {"id": "imp-46", "fecha": "2026-03-26", "resultado": -515.0, "retiro": 0}, {"id": "imp-47", "fecha": "2026-03-27", "resultado": -540.0, "retiro": 0}, {"id": "imp-48", "fecha": "2026-03-31", "resultado": -98.0, "retiro": 0}, {"id": "imp-49", "fecha": "2026-04-01", "resultado": -390.0, "retiro": 0}, {"id": "imp-50", "fecha": "2026-04-02", "resultado": 375.0, "retiro": 0}, {"id": "imp-51", "fecha": "2026-04-06", "resultado": -194.0, "retiro": 0}, {"id": "imp-52", "fecha": "2026-04-07", "resultado": 140.0, "retiro": 0}, {"id": "imp-53", "fecha": "2026-04-08", "resultado": 424.0, "retiro": 0}, {"id": "imp-54", "fecha": "2026-04-09", "resultado": -327.0, "retiro": 0}, {"id": "imp-55", "fecha": "2026-04-10", "resultado": -300.0, "retiro": 0}, {"id": "imp-56", "fecha": "2026-04-13", "resultado": -100.0, "retiro": 0}, {"id": "imp-57", "fecha": "2026-04-14", "resultado": -368.0, "retiro": 0}, {"id": "imp-58", "fecha": "2026-04-16", "resultado": -200.0, "retiro": 0}, {"id": "imp-59", "fecha": "2026-04-17", "resultado": -307.0, "retiro": 0}, {"id": "imp-60", "fecha": "2026-04-23", "resultado": -300.0, "retiro": 0}, {"id": "imp-61", "fecha": "2026-04-24", "resultado": -198.0, "retiro": 0}, {"id": "imp-62", "fecha": "2026-05-07", "resultado": -125.0, "retiro": 0}, {"id": "imp-63", "fecha": "2026-05-08", "resultado": -125.0, "retiro": 0}, {"id": "imp-64", "fecha": "2026-05-12", "resultado": 70.0, "retiro": 0}, {"id": "imp-65", "fecha": "2026-05-13", "resultado": -158.5, "retiro": 0}, {"id": "imp-66", "fecha": "2026-05-14", "resultado": 230.0, "retiro": 0}, {"id": "imp-67", "fecha": "2026-05-15", "resultado": 416.0, "retiro": 0}, {"id": "imp-68", "fecha": "2026-05-18", "resultado": 180.5, "retiro": 0}, {"id": "imp-69", "fecha": "2026-05-19", "resultado": -141.0, "retiro": 0}, {"id": "imp-70", "fecha": "2026-05-20", "resultado": 89.0, "retiro": 0}, {"id": "imp-71", "fecha": "2026-05-21", "resultado": 19.0, "retiro": 0}, {"id": "imp-72", "fecha": "2026-05-22", "resultado": -100.0, "retiro": 0}, {"id": "imp-73", "fecha": "2026-05-26", "resultado": -294.0, "retiro": 0}, {"id": "imp-74", "fecha": "2026-05-28", "resultado": -70.0, "retiro": 0}, {"id": "imp-75", "fecha": "2026-05-29", "resultado": 310.0, "retiro": 0}, {"id": "imp-76", "fecha": "2026-06-01", "resultado": 50.0, "retiro": 0}, {"id": "imp-77", "fecha": "2026-06-02", "resultado": -82.0, "retiro": 0}, {"id": "imp-78", "fecha": "2026-06-03", "resultado": 102.0, "retiro": 0}, {"id": "imp-79", "fecha": "2026-06-04", "resultado": 319.0, "retiro": 0}, {"id": "imp-80", "fecha": "2026-06-05", "resultado": 270.0, "retiro": 0}, {"id": "imp-81", "fecha": "2026-06-08", "resultado": 250.0, "retiro": 0}, {"id": "imp-82", "fecha": "2026-06-09", "resultado": 570.0, "retiro": 0}, {"id": "imp-83", "fecha": "2026-06-10", "resultado": 182.0, "retiro": 0}, {"id": "imp-84", "fecha": "2026-06-11", "resultado": -50.0, "retiro": 0}, {"id": "imp-85", "fecha": "2026-06-12", "resultado": 162.0, "retiro": 0}, {"id": "imp-86", "fecha": "2026-06-15", "resultado": -40.0, "retiro": 0}, {"id": "imp-87", "fecha": "2026-06-16", "resultado": 180.0, "retiro": 0}, {"id": "imp-88", "fecha": "2026-06-17", "resultado": 130.0, "retiro": 0}, {"id": "imp-89", "fecha": "2026-06-18", "resultado": 95.0, "retiro": 775.0}, {"id": "imp-90", "fecha": "2026-06-22", "resultado": 215.0, "retiro": 0}, {"id": "imp-91", "fecha": "2026-06-23", "resultado": 180.0, "retiro": 0}, {"id": "imp-92", "fecha": "2026-06-24", "resultado": 269.0, "retiro": 0}, {"id": "imp-93", "fecha": "2026-06-25", "resultado": 370.0, "retiro": 0}, {"id": "imp-94", "fecha": "2026-06-26", "resultado": 152.0, "retiro": 0}, {"id": "imp-95", "fecha": "2026-06-29", "resultado": 181.0, "retiro": 0}, {"id": "imp-96", "fecha": "2026-06-30", "resultado": 114.0, "retiro": 1500.0}, {"id": "imp-97", "fecha": "2026-07-02", "resultado": 290.0, "retiro": 0}];
+let entries = [];
+let capitalInicial = null;
+let chart = null;
+let selectedYear = null;
+
+function askConfirm(message){
+  return new Promise((resolve)=>{
+    const banner = document.getElementById('confirmBanner');
+    document.getElementById('confirmMsg').textContent = message;
+    banner.style.display = 'flex';
+    const yes = document.getElementById('confirmYes');
+    const no = document.getElementById('confirmNo');
+    function cleanup(result){
+      banner.style.display = 'none';
+      yes.removeEventListener('click', onYes);
+      no.removeEventListener('click', onNo);
+      resolve(result);
+    }
+    function onYes(){ cleanup(true); }
+    function onNo(){ cleanup(false); }
+    yes.addEventListener('click', onYes);
+    no.addEventListener('click', onNo);
+  });
+}
+function showToast(message){
+  const t = document.getElementById('toast');
+  t.textContent = message;
+  t.style.display = 'block';
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=>{ t.style.display = 'none'; }, 4000);
+}
+
+function buildLineChartSvg(labels, serieA, serieB){
+  const W = 1100, H = 420, padL = 80, padR = 24, padT = 24, padB = 40;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const all = serieA.concat(serieB);
+  const min = Math.min(...all), max = Math.max(...all);
+  const range = (max - min) || 1;
+  const n = labels.length;
+  const x = i => padL + (n<=1 ? 0 : (i/(n-1))*innerW);
+  const y = v => padT + innerH - ((v-min)/range)*innerH;
+
+  function pathFor(serie){
+    return serie.map((v,i)=> (i===0?'M':'L') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+  }
+  function areaFor(serie){
+    const line = serie.map((v,i)=> (i===0?'M':'L') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+    return line + ` L${x(n-1).toFixed(1)},${(padT+innerH).toFixed(1)} L${x(0).toFixed(1)},${(padT+innerH).toFixed(1)} Z`;
+  }
+
+  const gridLines = [];
+  const steps = 5;
+  for(let i=0;i<=steps;i++){
+    const v = min + (range*i/steps);
+    const yy = y(v);
+    gridLines.push(`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="#242B3A" stroke-width="1"/>`);
+    gridLines.push(`<text x="${padL-12}" y="${(yy+5).toFixed(1)}" text-anchor="end" font-size="14" fill="#9AA4B8" font-family="IBM Plex Mono, monospace">$${Math.round(v).toLocaleString('es-AR')}</text>`);
+  }
+
+  const tickCount = Math.min(7, n);
+  const xLabels = [];
+  for(let i=0;i<tickCount;i++){
+    const idx = Math.round(i*(n-1)/(Math.max(tickCount-1,1)));
+    xLabels.push(`<text x="${x(idx).toFixed(1)}" y="${H-12}" text-anchor="middle" font-size="13" fill="#9AA4B8" font-family="IBM Plex Mono, monospace">${labels[idx]}</text>`);
+  }
+
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%; height:420px; display:block;" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    ${gridLines.join('')}
+    <path d="${areaFor(serieA)}" fill="rgba(240,169,62,.10)" stroke="none"/>
+    <path d="${pathFor(serieB)}" fill="none" stroke="#5B87B8" stroke-width="2" stroke-dasharray="6,5"/>
+    <path d="${pathFor(serieA)}" fill="none" stroke="#F0A93E" stroke-width="2.5"/>
+    ${xLabels.join('')}
+  </svg>`;
+}
+
+function fmt(n){
+  const r = Math.round(n*100)/100;
+  return r.toLocaleString('es-AR', {maximumFractionDigits:2});
+}
+function fmtMoney(n){
+  const sign = n < 0 ? '-' : '';
+  return sign + '$ ' + fmt(Math.abs(n));
+}
+function todayStr(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+async function loadData(){
+  try{
+    const cfg = await window.storage.get('trading-config');
+    capitalInicial = cfg ? JSON.parse(cfg.value).capitalInicial : null;
+  }catch(e){ capitalInicial = null; }
+  try{
+    const res = await window.storage.get('trading-entries');
+    entries = res ? JSON.parse(res.value) : [];
+  }catch(e){ entries = []; }
+
+  if(capitalInicial === null){
+    document.getElementById('onboard').style.display = 'block';
+    document.getElementById('main').style.display = 'none';
+  } else {
+    document.getElementById('onboard').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    document.getElementById('inFecha').value = todayStr();
+    render();
+  }
+}
+
+async function saveConfig(){
+  try{
+    await window.storage.set('trading-config', JSON.stringify({capitalInicial}));
+  }catch(e){
+    showToast('No se pudo guardar el capital inicial. Probá de nuevo.');
+  }
+}
+async function saveEntries(){
+  try{
+    await window.storage.set('trading-entries', JSON.stringify(entries));
+  }catch(e){
+    showToast('No se pudo guardar el dato. Probá de nuevo.');
+  }
+}
+
+function computeSeries(){
+  const sorted = [...entries].sort((a,b)=> a.fecha.localeCompare(b.fecha));
+  let neto = capitalInicial;
+  let bruto = capitalInicial;
+  const rows = [];
+  for(const e of sorted){
+    neto += e.resultado;
+    bruto += e.resultado - (e.retiro || 0);
+    rows.push({...e, saldoNeto:neto, saldoBruto:bruto});
+  }
+  return rows;
+}
+
+function render(){
+  const rows = computeSeries();
+  const n = rows.length;
+
+  const capitalActual = n ? rows[n-1].saldoNeto : capitalInicial;
+  const saldoReal = n ? rows[n-1].saldoBruto : capitalInicial;
+  const totalRetirado = rows.reduce((s,r)=> s + (r.retiro||0), 0);
+  const resultadoAcumTotal = rows.reduce((s,r)=> s + r.resultado, 0);
+  const retornoTotal = capitalInicial ? resultadoAcumTotal/capitalInicial : 0;
+
+  document.getElementById('capitalActual').innerHTML = fmtMoney(capitalActual) + '<span class="cursor"></span>';
+  document.getElementById('saldoReal').textContent = fmtMoney(saldoReal);
+  const delta = n ? rows[n-1].resultado : 0;
+  const heroDelta = document.getElementById('heroDelta');
+  if(n){
+    heroDelta.className = 'hero-sub mono ' + (delta>=0?'delta-up':'delta-down');
+    heroDelta.textContent = (delta>=0?'▲ ':'▼ ') + fmtMoney(delta) + ' último día registrado';
+  } else {
+    heroDelta.textContent = 'Sin días cargados todavía';
+  }
+  document.getElementById('heroRetiros').textContent = totalRetirado
+    ? fmtMoney(totalRetirado) + ' retirados en total'
+    : 'Sin retiros todavía';
+
+  const kpisCuenta = [
+    ['Capital inicial', fmtMoney(capitalInicial)],
+    ['Resultado', fmtMoney(resultadoAcumTotal)],
+    ['Total retirado', fmtMoney(totalRetirado)],
+    ['Saldo actual', fmtMoney(capitalActual)],
+    ['% Retorno', (retornoTotal*100).toFixed(1)+'%'],
+  ];
+  document.getElementById('kpiGridCuenta').innerHTML = kpisCuenta.map(([l,v])=>
+    `<div class="card"><p class="kpi-label">${l}</p><p class="kpi-val mono">${v}</p></div>`
+  ).join('');
+
+  const years = Array.from(new Set(rows.map(r=>r.fecha.slice(0,4)))).sort();
+  const yearSelect = document.getElementById('yearSelect');
+  if(years.length === 0){
+    yearSelect.innerHTML = `<option>${new Date().getFullYear()}</option>`;
+    selectedYear = String(new Date().getFullYear());
+  } else {
+    if(!selectedYear || !years.includes(selectedYear)) selectedYear = years[years.length-1];
+    yearSelect.innerHTML = years.map(y=>`<option value="${y}" ${y===selectedYear?'selected':''}>${y}</option>`).join('');
+  }
+  yearSelect.onchange = ()=>{ selectedYear = yearSelect.value; render(); };
+
+  const rowsYear = rows.filter(r=> r.fecha.slice(0,4) === selectedYear);
+  const ny = rowsYear.length;
+  const resultados = rowsYear.map(r=>r.resultado);
+  const resultadoAcumYear = resultados.reduce((s,x)=>s+x,0);
+  const promDiario = ny ? resultadoAcumYear / ny : 0;
+  const mayorGanancia = ny ? Math.max(...resultados) : 0;
+  const mayorPerdida = ny ? Math.min(...resultados) : 0;
+  const ganadores = resultados.filter(x=>x>0);
+  const perdedores = resultados.filter(x=>x<0);
+  const pctGanadores = ny ? ganadores.length/ny : 0;
+  const pctPerdedores = ny ? perdedores.length/ny : 0;
+  const gananciaMedia = ganadores.length ? ganadores.reduce((s,x)=>s+x,0)/ganadores.length : 0;
+  const perdidaMedia = perdedores.length ? Math.abs(perdedores.reduce((s,x)=>s+x,0)/perdedores.length) : 0;
+  const ratioGanPerd = perdidaMedia ? gananciaMedia/perdidaMedia : (gananciaMedia ? Infinity : 0);
+
+  const ver = document.getElementById('veredicto');
+  if(ny===0){
+    ver.className = 'veredicto';
+    ver.textContent = 'Cargá al menos un día de ' + selectedYear + ' para ver el veredicto del sistema.';
+  } else if(promDiario > 0){
+    ver.className = 'veredicto ver-ok';
+    ver.textContent = '✔ Sistema rentable en ' + selectedYear + ' — expectativa positiva por operación';
+  } else {
+    ver.className = 'veredicto ver-bad';
+    ver.textContent = '⚠ Revisar sistema en ' + selectedYear + ' — expectativa negativa por operación';
+  }
+
+  const kpisPerformance = [
+    ['Días operados', ny],
+    ['Expectativa por operación', fmtMoney(promDiario)],
+    ['Mayor ganancia', fmtMoney(mayorGanancia)],
+    ['Mayor pérdida', fmtMoney(mayorPerdida)],
+    ['% días ganadores', (pctGanadores*100).toFixed(0)+'%'],
+    ['% días perdedores', (pctPerdedores*100).toFixed(0)+'%'],
+    ['Ganancia media', fmtMoney(gananciaMedia)],
+    ['Pérdida media', fmtMoney(perdidaMedia)],
+    ['Ratio gan./pérd.', isFinite(ratioGanPerd)? ratioGanPerd.toFixed(2) : '—'],
+  ];
+  document.getElementById('kpiGridPerformance').innerHTML = kpisPerformance.map(([l,v])=>
+    `<div class="card"><p class="kpi-label">${l}</p><p class="kpi-val mono">${v}</p></div>`
+  ).join('');
+
+  const monthSums = new Array(12).fill(null);
+  document.getElementById('monthsYearLabel').textContent = selectedYear || '';
+  for(const r of rowsYear){
+    const m = parseInt(r.fecha.slice(5,7),10)-1;
+    monthSums[m] = (monthSums[m]||0) + r.resultado;
+  }
+  document.getElementById('monthsGrid').innerHTML = MESES.map((name,i)=>{
+    const v = monthSums[i];
+    const cls = v==null ? '' : (v>=0?'pos':'neg');
+    return `<div class="month-cell"><div class="month-name">${name.slice(0,3)}</div><div class="month-val mono ${cls}">${v==null?'—':fmtMoney(v)}</div></div>`;
+  }).join('');
+
+  const chartHost = document.getElementById('evolChart');
+  if(!n){
+    chartHost.innerHTML = '<div class="empty">Cargá al menos un día para ver la evolución.</div>';
+  } else {
+    const labels = rows.map(r=>r.fecha);
+    const netoData = rows.map(r=>Math.round(r.saldoNeto*100)/100);
+    const brutoData = rows.map(r=>Math.round(r.saldoBruto*100)/100);
+    chartHost.innerHTML = buildLineChartSvg(labels, netoData, brutoData);
+  }
+
+  const tblWrap = document.getElementById('tblWrap');
+  if(!n){
+    tblWrap.innerHTML = '<div class="empty">Todavía no cargaste ningún día.</div>';
+  } else {
+    const rowsHtml = [...rows].reverse().map(r=>{
+      const cls = r.resultado>=0?'pos':'neg';
+      const arrow = r.resultado>=0?'▲':'▼';
+      return `<tr>
+        <td class="mono">${r.fecha}</td>
+        <td class="mono">${fmtMoney(r.saldoBruto)}</td>
+        <td class="mono">${r.retiro ? fmtMoney(r.retiro) : '—'}</td>
+        <td class="mono">${fmtMoney(r.saldoNeto)}</td>
+        <td class="mono ${cls}">${arrow} ${fmtMoney(r.resultado)}</td>
+        <td><button class="row-del" data-id="${r.id}" title="Eliminar día">✕</button></td>
+      </tr>`;
+    }).join('');
+    tblWrap.innerHTML = `<table>
+      <thead><tr><th>Fecha</th><th>Saldo bruto</th><th>Retiro</th><th>Saldo neto</th><th>P&L día</th><th></th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>`;
+    tblWrap.querySelectorAll('.row-del').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        entries = entries.filter(e=>e.id !== btn.dataset.id);
+        await saveEntries();
+        render();
+      });
+    });
+  }
+}
+
+document.getElementById('btnOnboard').addEventListener('click', async ()=>{
+  const val = parseFloat(document.getElementById('capitalInicialInput').value);
+  if(isNaN(val) || val <= 0) return;
+  capitalInicial = val;
+  await saveConfig();
+  document.getElementById('onboard').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  document.getElementById('inFecha').value = todayStr();
+  render();
+});
+
+document.getElementById('btnAdd').addEventListener('click', async ()=>{
+  const fecha = document.getElementById('inFecha').value;
+  const resultado = parseFloat(document.getElementById('inResultado').value);
+  const retiro = parseFloat(document.getElementById('inRetiro').value) || 0;
+  const msg = document.getElementById('formMsg');
+  if(!fecha || isNaN(resultado)){
+    msg.textContent = 'Completá la fecha y el resultado del día.';
+    msg.style.display = 'block';
+    return;
+  }
+  msg.style.display = 'none';
+  const existingIdx = entries.findIndex(e=>e.fecha === fecha);
+  const entry = {id: existingIdx>=0 ? entries[existingIdx].id : (Date.now()+''+Math.random()), fecha, resultado, retiro};
+  if(existingIdx>=0) entries[existingIdx] = entry; else entries.push(entry);
+  await saveEntries();
+  document.getElementById('inResultado').value = '';
+  document.getElementById('inRetiro').value = '';
+  document.getElementById('inFecha').value = todayStr();
+  render();
+});
+
+async function importarHistorico(){
+  const yaHayDatos = entries.length > 0 || capitalInicial !== null;
+  const msg = yaHayDatos
+    ? `Se van a importar ${HISTORICO_ENTRIES.length} días del Excel (capital inicial $${HISTORICO_CAPITAL_INICIAL.toLocaleString('es-AR')}). Los días que ya tenés cargados a mano se conservan tal cual; solo se agregan las fechas que te falten. ¿Continuar?`
+    : `Se van a importar ${HISTORICO_ENTRIES.length} días del Excel, con capital inicial $${HISTORICO_CAPITAL_INICIAL.toLocaleString('es-AR')}. ¿Continuar?`;
+  const ok = await askConfirm(msg);
+  if(!ok) return;
+
+  if(capitalInicial === null){
+    capitalInicial = HISTORICO_CAPITAL_INICIAL;
+    await saveConfig();
+  }
+  const existingFechas = new Set(entries.map(e=>e.fecha));
+  let agregados = 0;
+  for(const imp of HISTORICO_ENTRIES){
+    if(!existingFechas.has(imp.fecha)){
+      entries.push({...imp});
+      agregados++;
+    }
+  }
+  await saveEntries();
+  document.getElementById('onboard').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  document.getElementById('inFecha').value = todayStr();
+  render();
+  showToast(`Importación completa: se agregaron ${agregados} días.`);
+}
+
+document.getElementById('btnImport').addEventListener('click', importarHistorico);
+document.getElementById('btnImportOnboard').addEventListener('click', importarHistorico);
+
+document.getElementById('btnReset').addEventListener('click', async ()=>{
+  const ok = await askConfirm('Esto borra todos los días cargados y el capital inicial. ¿Continuar?');
+  if(!ok) return;
+  entries = [];
+  capitalInicial = null;
+  try{ await window.storage.delete('trading-entries'); }catch(e){}
+  try{ await window.storage.delete('trading-config'); }catch(e){}
+  document.getElementById('onboard').style.display = 'block';
+  document.getElementById('main').style.display = 'none';
+});
+
+loadData();
+</script>
